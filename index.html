@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiz App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+    body {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .quiz-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 2rem;
+    }
+    #progress-container {
+      margin-bottom: 20px;
+    }
+    #progress-text {
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+    }
+    #progress-bar {
+      width: 100%;
+      background: #444;
+      border-radius: 10px;
+      height: 15px;
+      overflow: hidden;
+    }
+    #progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: #00b4db;
+      border-radius: 10px 0 0 10px;
+      transition: width 0.3s ease;
+    }
+    .question {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      min-height: 60px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .answers button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #ffffff10;
+      color: #fff;
+      transition: background-color 0.2s ease;
+      cursor: pointer;
+      font-weight: 500;
+      user-select: none;
+    }
+    .answers button:hover:not(:disabled) {
+      background-color: #00b4db;
+    }
+    .answers button:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+    .score-section {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .hidden {
+      display: none;
+    }
+    #restart-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #00b4db;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    #restart-btn:hover {
+      background-color: #0099c9;
+    }
+    @media (max-width: 600px) {
+      .quiz-container {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .question {
+        font-size: 1rem;
+      }
+      .answers button {
+        font-size: 0.9rem;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>Simple Quiz App</h1>
+
+    <div id="progress-container">
+      <div id="progress-text">Question 1 of 1</div>
+      <div id="progress-bar">
+        <div id="progress-bar-fill"></div>
+      </div>
+    </div>
+
+    <div class="question" id="question">Loading question...</div>
+    <div class="answers" id="answers"></div>
+    <div class="score-section hidden" id="score"></div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "What does HTML stand for?",
+        answers: [
+          "Hyper Text Markup Language",
+          "Home Tool Markup Language",
+          "Hyperlinks and Text Markup Language",
+          "None of the above"
+        ],
+        correct: 0
+      },
+      {
+        question: "What is the correct syntax for referring to an external script called 'app.js'?",
+        answers: [
+          "<script href='app.js'>",
+          "<script name='app.js'>",
+          "<script src='app.js'>",
+          "<script file='app.js'>"
+        ],
+        correct: 2
+      },
+      {
+        question: "Which CSS property is used to change text color?",
+        answers: [
+          "font-color",
+          "color",
+          "text-color",
+          "font-style"
+        ],
+        correct: 1
+      },
+      {
+        question: "Which HTML element is used to specify a footer for a document or section?",
+        answers: [
+          "<bottom>",
+          "<footer>",
+          "<section>",
+          "<foot>"
+        ],
+        correct: 1
+      },
+      {
+        question: "Inside which HTML element do we put the JavaScript?",
+        answers: [
+          "<js>",
+          "<script>",
+          "<javascript>",
+          "<scripting>"
+        ],
+        correct: 1
+      },
+      {
+        question: "Which property is used to change the background color in CSS?",
+        answers: [
+          "background-color",
+          "color",
+          "bgcolor",
+          "background-style"
+        ],
+        correct: 0
+      },
+      {
+        question: "How do you write 'Hello World' in an alert box in JavaScript?",
+        answers: [
+          "msg('Hello World');",
+          "alertBox('Hello World');",
+          "msgBox('Hello World');",
+          "alert('Hello World');"
+        ],
+        correct: 3
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById('question');
+    const answersEl = document.getElementById('answers');
+    const scoreEl = document.getElementById('score');
+
+    const progressText = document.getElementById('progress-text');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const progressContainer = document.getElementById('progress-container');
+
+    function loadQuestion() {
+      if (currentQuestion >= questions.length) {
+        // Quiz finished
+        questionEl.classList.add('hidden');
+        answersEl.classList.add('hidden');
+        progressText.classList.add('hidden');
+        progressContainer.classList.add('hidden');
+
+        scoreEl.classList.remove('hidden');
+        scoreEl.innerHTML = `
+          You scored <strong>${score}</strong> out of <strong>${questions.length}</strong>!<br />
+          <button id="restart-btn">Restart Quiz</button>
+        `;
+        document.getElementById('restart-btn').onclick = restartQuiz;
+        return;
+      }
+
+      // Show question and answers
+      const q = questions[currentQuestion];
+      questionEl.innerText = q.question;
+      answersEl.innerHTML = '';
+      questionEl.classList.remove('hidden');
+      answersEl.classList.remove('hidden');
+      progressText.classList.remove('hidden');
+      progressContainer.classList.remove('hidden');
+      scoreEl.classList.add('hidden');
+
+      // Update progress text and bar
+      progressText.innerText = `Question ${currentQuestion + 1} of ${questions.length}`;
+      progressBarFill.style.width = `${(currentQuestion / questions.length) * 100}%`;
+
+      q.answers.forEach((answer, index) => {
+        const btn = document.createElement('button');
+        btn.innerText = answer;
+        btn.onclick = () => handleAnswer(index, btn);
+        answersEl.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selectedIndex, clickedButton) {
+      const q = questions[currentQuestion];
+
+      // Disable all buttons
+      Array.from(answersEl.children).forEach(btn => btn.disabled = true);
+
+      if (selectedIndex === q.correct) {
+        score++;
+        clickedButton.style.backgroundColor = '#28a745'; // green
+      } else {
+        clickedButton.style.backgroundColor = '#dc3545'; // red
+        // Highlight correct answer
+        answersEl.children[q.correct].style.backgroundColor = '#28a745';
+      }
+
+      currentQuestion++;
+
+      // Update progress bar to next question after delay
+      setTimeout(loadQuestion, 1000);
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      loadQuestion();
+    }
+
+    // Initialize quiz
+    loadQuestion();
+  </script>
+</body>
+</html>
