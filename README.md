@@ -1,5 +1,5 @@
 🎯 Simple Quiz App
-A clean and responsive Quiz App built using HTML, CSS, and JavaScript. It tests basic knowledge of web development topics like HTML, CSS, and JavaScript. The app features a dynamic progress bar, immediate feedback for each answer, and a score summary at the end.
+    A clean and responsive Quiz App built using HTML, CSS, and JavaScript. It tests basic knowledge of web development topics like HTML, CSS, and JavaScript. The app features a dynamic progress bar, immediate           feedback for each answer, and a score summary at the end.
 
 📸 Features
 📱 Responsive UI — Works well on mobile and desktop devices
